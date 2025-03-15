@@ -92,6 +92,17 @@ app.MapGet("/carts/{cartId}", async (BangazonDbContext db, int cartId) =>
     return cart is not null ? Results.Ok(cart) : Results.NotFound();
 });
 
+app.MapGet("/carts/completed", (BangazonDbContext db) =>
+{
+    var completedCarts = db.Cart
+        .Where(c => c.CompletionDate != null) // Filter only completed carts
+        .Include(c => c.CartItems)
+        .ThenInclude(cI => cI.Product)
+        .ToList(); // Execute synchronously
+
+    return completedCarts.Any() ? Results.Ok(completedCarts) : Results.NotFound();
+});
+
 app.MapGet("/api/cartItems/{cartId}", (BangazonDbContext db, int cartId) =>
 {
     var cartItems = db.CartItem
